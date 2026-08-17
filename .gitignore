@@ -1,0 +1,6 @@
+# Ignorar pasta do Visual Studio Code
+.vscode/
+# Ignorar toda a pasta de Logs
+Logs/
+# Ignorar qualquer arquivo de extensão .log
+*.log
