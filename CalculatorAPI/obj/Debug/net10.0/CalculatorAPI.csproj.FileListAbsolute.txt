@@ -26,3 +26,13 @@ C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\refint\CalculatorAPI.dll
 C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\CalculatorAPI.pdb
 C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\CalculatorAPI.genruntimeconfig.cache
 C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\ref\CalculatorAPI.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\bin\Debug\net10.0\FluentValidation.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\bin\Debug\net10.0\FluentValidation.DependencyInjectionExtensions.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\CalculatorAPI.csproj.AssemblyReference.cache
+C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\CalculatorAPI.MvcApplicationPartsAssemblyInfo.cs
+C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\CalculatorAPI.sourcelink.json
+C:\temp\ProjetoWeb02\CalculatorAPI\obj\Debug\net10.0\Calculat.2C0901E7.Up2Date
