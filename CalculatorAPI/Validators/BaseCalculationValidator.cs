@@ -3,9 +3,9 @@ using CalculatorAPI.Models;
 
 namespace CalculatorAPI.Validators;
 
-public class CalculationRequestValidator : AbstractValidator<CalculationRequest>
+public class BaseCalculationValidator<T> : AbstractValidator<T> where T : ICalculation
 {
-    public CalculationRequestValidator()
+    public BaseCalculationValidator()
     {
         RuleFor(x => x.Operator)
             .NotEmpty().WithMessage("O operador não pode ser vazio.")

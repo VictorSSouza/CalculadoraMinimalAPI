@@ -1,5 +1,10 @@
 # Ignorar pasta do Visual Studio Code
 .vscode/
+
+# Ignora todos os arquivos do SQlite
+*.db
+*.db-shm
+*.db-wal
 # Ignorar toda a pasta de Logs
 Logs/
 # Ignorar qualquer arquivo de extensão .log

@@ -1,12 +1,30 @@
 using FluentValidation;
 using CalculatorAPI.Models;
+using CalculatorAPI.Data;
 using CalculatorAPI.Validators;
 using CalculatorAPI.Services;
+using CalculatorAPI.Logging;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adiciona o serviço de logging personalizado
+builder.Services.AddHttpContextAccessor();
+// Registra o Provider resolvendo a dependência do IHttpContextAccessor
+builder.Services.AddSingleton<ILoggerProvider>(sp =>
+{
+    var config = new CustomLoggerProviderConfiguration { LogLevel = LogLevel.Information };
+    var accessor = sp.GetRequiredService<IHttpContextAccessor>();
+    return new CustomLoggerProvider(config, accessor);
+});
+
+
 builder.Services.AddValidatorsFromAssemblyContaining<CalculationRequestValidator>();
+
 builder.Services.AddTransient<IValidator<CalculationRequest>, CalculationRequestValidator>();
+
+builder.Services.AddDbContext<AppDbContext>(opt =>
+    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddTransient<CalculatorService>();
 
@@ -18,6 +36,13 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+
+// Garantir que o banco SQLite existe
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
 
 // Configuração dos Middlewares
 app.UseCors();
@@ -35,44 +60,72 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapPost("/calcular", async (CalculationRequest request, IValidator<CalculationRequest> validator, CalculatorService calculatorService) =>
+app.MapPost("/calcular", async (CalculationRequest request,
+IValidator<CalculationRequest> reqValidator, CalculatorService calculatorService,
+AppDbContext db) =>
 {
-    var validationResult = await validator.ValidateAsync(request);
-    if (!validationResult.IsValid)
+    var reqValidation = await reqValidator.ValidateAsync(request);
+    if (!reqValidation.IsValid)
     {
-        return Results.ValidationProblem(
-        validationResult.Errors.GroupBy(e => e.PropertyName)
-            .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()
-        ));
+        return Results.ValidationProblem(reqValidation.ToDictionary());
     }
 
-    try
-    {
-        // Chama o serviço de cálculo para realizar a operação
-        var result = calculatorService.Calculate(request.LeftOperand, request.Operator, request.RightOperand);
-        // Cria a expressão completa do cálculo como uma string para exibição
-        var expression = $"{request.LeftOperand} {request.Operator} {request.RightOperand} = {result}";
+    // Realiza o cálculo com calculatorService
+    var result = calculatorService.Calculate(
+        request.LeftOperand,
+        request.Operator,
+        request.RightOperand
+    );
 
-        return Results.Ok(new { result, expression });
-    }
-    catch (DivideByZeroException)
+    // Adiciona o cálculo ao histórico
+    var calculationHistory = new CalculationHistory
     {
-        // Mesmo formato do ValidationProblem
-        return Results.ValidationProblem(
-            new Dictionary<string, string[]> {
-                { "RightOperand", new[] { "Não é possível dividir por zero." } }
-            }
-        );
-    }
-    catch (ArgumentException)
+        LeftOperand = request.LeftOperand,
+        RightOperand = request.RightOperand,
+        Operator = request.Operator,
+        Result = result,
+        CreatedAt = DateTime.UtcNow
+    };
+
+    db.CalculationHistory.Add(calculationHistory);
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new
     {
-        // Mesmo formato do ValidationProblem
-        return Results.ValidationProblem(
-            new Dictionary<string, string[]> {
-                { "Operator", new[] { "Operador inválido." } }
-            }
-        );
-    }
+        Result = result,
+        HistoryId = calculationHistory.Id
+    });
 });
+
+// Histórico de cálculos realizados
+app.MapGet("/historico", async (AppDbContext db, ILogger<Program> logger) =>
+{
+    logger.LogInformation("Listando o histórico de cálculos");
+
+    var result = await db.CalculationHistory
+        .OrderByDescending(ch => ch.CreatedAt)
+        .Select(ch => new
+        {
+            ch.LeftOperand,
+            ch.Operator,
+            ch.RightOperand,
+            ch.Result,
+            ch.CreatedAt
+        }) // seleciona todos os campos do histórico de cálculos
+        .ToArrayAsync();
+
+    return Results.Ok(result);
+});
+
+
+app.MapDelete("/historico", async (AppDbContext db) =>
+{
+    // Remove todos os registros do histórico de cálculos
+    db.CalculationHistory.RemoveRange(db.CalculationHistory);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+});
+
 
 app.Run();
