@@ -1,6 +1,7 @@
 # Ignorar pasta do Visual Studio Code
 .vscode/
-
+# Ignorar configurações de rota config.js
+config.js
 # Ignora todos os arquivos do SQlite
 *.db
 *.db-shm
