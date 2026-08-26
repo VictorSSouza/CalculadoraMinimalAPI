@@ -10,30 +10,43 @@
 
 <body>
 
-    <div class="calculator">
-        <h2>Calculadora</h2>
+    <div class="main-container">
+        <!-- Calculadora -->
+        <div class="calculator">
+            <input type="text" id="display" placeholder="0" />
+            <div class="grid">
+                <button class="clear" onclick="clearDisplay()">C</button>
+                <button onclick="append('(')">(</button>
+                <button onclick="append(')')">)</button>
+                <button class="op" onclick="append('/')">/</button>
 
-        <input type="number" id="num1" placeholder="Primeiro número" required>
+                <button onclick="append('7')">7</button>
+                <button onclick="append('8')">8</button>
+                <button onclick="append('9')">9</button>
+                <button class="op" onclick="append('*')">*</button>
 
-        <select id="operation">
-            <option value="+">Somar (+)</option>
-            <option value="-">Subtrair (-)</option>
-            <option value="*">Multiplicar (×)</option>
-            <option value="/">Dividir (÷)</option>
-        </select>
+                <button onclick="append('4')">4</button>
+                <button onclick="append('5')">5</button>
+                <button onclick="append('6')">6</button>
+                <button class="op" onclick="append('-')">-</button>
 
-        <input type="number" id="num2" placeholder="Segundo número" required>
+                <button onclick="append('1')">1</button>
+                <button onclick="append('2')">2</button>
+                <button onclick="append('3')">3</button>
+                <button class="op" onclick="append('+')">+</button>
 
-        <button onclick="calculate()">Calcular</button>
-
-        <div class="result-container">
-            <span>Resultado:</span><br>
-            <span id="result">---</span>
+                <button onclick="append('0')">0</button>
+                <button onclick="append('.')">.</button>
+                <button onclick="append('%')">%</button>
+                <button class="op" onclick="calculate()">=</button>
+            </div>
         </div>
 
+        <!-- Histórico -->
         <div class="history-container">
             <h3>Histórico</h3>
             <button class="btn-secondary" onclick="loadHistory()">Carregar Histórico</button>
+            <button class="clear" onclick="clearHistory()">Excluir Histórico</button>
             <ul id="historyList"></ul>
         </div>
     </div>

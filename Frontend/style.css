@@ -1,93 +1,150 @@
- body {
-     font-family: Arial, sans-serif;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     min-height: 100vh;
-     background-color: #f4f4f9;
-     margin: 0;
-     padding: 20px;
- }
+* {
+    box-sizing: border-box;
+}
 
- .calculator {
-     background: #fff;
-     padding: 25px;
-     border-radius: 12px;
-     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-     width: 350px;
- }
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 50px;
+    background: #f4f4f9;
+    margin: 0;
+}
 
- h2,
- h3 {
-     text-align: center;
-     color: #333;
-     margin-top: 0;
- }
+/* Contêiner principal para alinhar a Calculadora e o Histórico lado a lado */
+.main-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
 
- input,
- select,
- button {
-     width: 100%;
-     padding: 12px;
-     margin: 8px 0;
-     border: 1px solid #ccc;
-     border-radius: 6px;
-     box-sizing: border-box;
-     font-size: 16px;
- }
+/* Estilos da Calculadora */
+.calculator {
+    width: 300px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
- button {
-     background-color: #007bff;
-     color: white;
-     border: none;
-     cursor: pointer;
-     font-weight: bold;
- }
+#display {
+    width: 100%;
+    height: 50px;
+    font-size: 1.5rem;
+    text-align: right;
+    margin-bottom: 15px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 
- button:hover {
-     background-color: #0056b3;
- }
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
 
- .btn-secondary {
-     background-color: #6c757d;
- }
+button {
+    height: 50px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    background: #e0e0e0;
+    cursor: pointer;
+    transition: background 0.2s;
+}
 
- .btn-secondary:hover {
-     background-color: #5a6268;
- }
+button:hover {
+    background: #d0d0d0;
+}
 
- .result-container {
-     margin: 15px 0;
-     text-align: center;
-     padding: 10px;
-     background-color: #e9ecef;
-     border-radius: 6px;
- }
+button.op {
+    background: #ff9500;
+    color: #fff;
+}
 
- #result {
-     font-size: 1.5em;
-     font-weight: bold;
-     color: #28a745;
- }
+button.op:hover {
+    background: #e08500;
+}
 
- .history-container {
-     margin-top: 20px;
-     border-top: 1px solid #eee;
-     padding-top: 15px;
- }
+button.clear {
+    background: #ff3b30;
+    color: #fff;
+}
 
- ul {
-     list-style-type: none;
-     padding: 0;
-     max-height: 150px;
-     overflow-y: auto;
- }
+button.clear:hover {
+    background: #d02b20;
+}
 
- li {
-     background: #f8f9fa;
-     padding: 8px 12px;
-     border-bottom: 1px solid #ddd;
-     font-size: 14px;
-     border-radius: 4px;
-     margin-bottom: 5px;
- }
+/* Estilos do Painel de Histórico */
+.history-container {
+    width: 280px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    max-height: 380px;
+    /* Mantém a mesma altura aproximada da calculadora */
+}
+
+.history-container h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+}
+
+.btn-secondary {
+    width: 100%;
+    height: 38px;
+    font-size: 0.95rem;
+    background: #007aff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #0056b3;
+}
+
+#historyList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    /* Adiciona barra de rolagem quando houver muitos itens */
+    flex-grow: 1;
+}
+
+#historyList li {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    color: #444;
+    display: flex;
+    justify-content: space-between;
+    word-break: break-all;
+}
+
+#historyList li:last-child {
+    border-bottom: none;
+}
+
+/* Responsividade para telas menores (empilha se não couber lado a lado) */
+@media (max-width: 620px) {
+    .main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .history-container {
+        width: 300px;
+    }
+}

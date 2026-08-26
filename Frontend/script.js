@@ -1,64 +1,50 @@
 // Trata se a URL termina com "/" para evitar "//calcular"
 const BASE_URL = (window.ENV_CONFIG?.API_BASE_URL || '').replace(/\/$/, '');
 
+const display = document.getElementById('display');
+let list = [];
+
+function append(value) {
+    if (display.value === 'Erro') display.value = '';
+    display.value += value;
+}
+
+function clearDisplay() {
+    display.value = '';
+}
+
 // 1. POST para enviar o cálculo
 async function calculate() {
-    const num1 = document.getElementById('num1').value;
-    const num2 = document.getElementById('num2').value;
-    const operation = document.getElementById('operation').value;
-    const resultElement = document.getElementById('result');
+    if (!display.value) return;
 
-    if (!num1 || !num2) {
-        resultElement.innerText = "Preencha os números!";
-        resultElement.style.color = "red";
-        return;
-    }
-
-    resultElement.innerText = "Calculando...";
-    resultElement.style.color = "#333";
-
-    // Estrutura JSON ajustada para sua API
+    // Envia a string inteira digitada no display como 'expression'
     const payload = {
-        leftOperand: parseFloat(num1),
-        operator: operation,
-        rightOperand: parseFloat(num2)
+        expression: display.value
     };
 
     try {
         const response = await fetch(`${BASE_URL}/calcular`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) throw new Error('Erro ao calcular');
+        if (!response.ok) throw new Error();
 
         const data = await response.json();
-
-        // Exibe o resultado retornado do backend
-        resultElement.innerText = data.result ?? data;
-        resultElement.style.color = "#28a745";
+        display.value = data.result;
 
         loadHistory();
-
-    } catch (error) {
-        console.error(error);
-        resultElement.innerText = "Erro na requisição";
-        resultElement.style.color = "red";
+    } catch {
+        display.value = 'Erro';
     }
 }
 
-// 2. GET para trazer o histórico
 async function loadHistory() {
     const historyList = document.getElementById('historyList');
 
     try {
-        const response = await fetch(`${BASE_URL}/historico`, {
-            method: 'GET'
-        });
-
+        const response = await fetch(`${BASE_URL}/historico`, { method: 'GET' });
         if (!response.ok) throw new Error('Erro ao buscar histórico');
 
         const history = await response.json();
@@ -67,18 +53,47 @@ async function loadHistory() {
         if (Array.isArray(history) && history.length > 0) {
             history.forEach(item => {
                 const li = document.createElement('li');
-                // Formata conforme as propriedades retornadas pela sua API
-                li.innerText = typeof item === 'object'
-                    ? `${item.leftOperand} ${item.operator} ${item.rightOperand} = ${item.result}`
-                    : item;
+
+                // 1. Exibe a expressão inteira se ela existir
+                if (item.expression) {
+                    li.innerText = `${item.expression} = ${item.result}`;
+                }
+                // 2. Exibe no formato simples caso seja um cálculo direto
+                else if (item.leftOperand !== null && item.leftOperand !== undefined) {
+                    li.innerText = `${item.leftOperand} ${item.operator} ${item.rightOperand} = ${item.result}`;
+                }
+                // 3. Fallback apenas com o resultado
+                else {
+                    li.innerText = `Resultado: ${item.result}`;
+                }
+
                 historyList.appendChild(li);
             });
         } else {
             historyList.innerHTML = '<li>Nenhum histórico encontrado.</li>';
         }
-
     } catch (error) {
         console.error(error);
         historyList.innerHTML = '<li style="color:red;">Erro ao carregar histórico</li>';
+    }
+}
+// 3. DELETE Excluir Histórico
+async function clearHistory() {
+    try {
+        const response = await fetch(`${BASE_URL}/historico`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            // Se o backend deletou com sucesso, recarrega a lista vazia ou limpa a tela
+            await loadHistory();
+            // Alternativa direta sem nova requisição HTTP:
+            // document.getElementById('historyList').innerHTML = '';
+        } else {
+            showError('Não foi possível excluir o histórico.');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showError('Erro ao excluir o histórico.');
     }
 }
