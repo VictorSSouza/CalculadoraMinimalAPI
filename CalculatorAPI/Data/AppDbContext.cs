@@ -19,9 +19,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<CalculationHistory>(entity =>
         {
             entity.HasKey(e => e.Id); // Define a chave primária
-            entity.Property(e => e.LeftOperand).IsRequired(); // Define que o operando esquerdo é obrigatório
-            entity.Property(e => e.RightOperand).IsRequired(); // Define que o operando direito
-            entity.Property(e => e.Operator).IsRequired(); // Define que o operador é obrigatório
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").IsRequired(); // Define valor padrão para CreatedAt
         });
     }

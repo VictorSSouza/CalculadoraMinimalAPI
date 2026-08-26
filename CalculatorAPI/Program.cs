@@ -18,6 +18,11 @@ builder.Services.AddSingleton<ILoggerProvider>(sp =>
     return new CustomLoggerProvider(config, accessor);
 });
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    // Permite converter números enviados como string e tratar valores nulos
+    options.SerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
+});
 
 builder.Services.AddValidatorsFromAssemblyContaining<CalculationRequestValidator>();
 
@@ -60,9 +65,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapPost("/calcular", async (CalculationRequest request,
-IValidator<CalculationRequest> reqValidator, CalculatorService calculatorService,
-AppDbContext db) =>
+app.MapPost("/calcular", async (
+    CalculationRequest request,
+    IValidator<CalculationRequest> reqValidator,
+    CalculatorService calculatorService,
+    AppDbContext db) =>
 {
     var reqValidation = await reqValidator.ValidateAsync(request);
     if (!reqValidation.IsValid)
@@ -70,31 +77,36 @@ AppDbContext db) =>
         return Results.ValidationProblem(reqValidation.ToDictionary());
     }
 
-    // Realiza o cálculo com calculatorService
-    var result = calculatorService.Calculate(
-        request.LeftOperand,
-        request.Operator,
-        request.RightOperand
-    );
-
-    // Adiciona o cálculo ao histórico
-    var calculationHistory = new CalculationHistory
+    try
     {
-        LeftOperand = request.LeftOperand,
-        RightOperand = request.RightOperand,
-        Operator = request.Operator,
-        Result = result,
-        CreatedAt = DateTime.UtcNow
-    };
+        // Escolhe um caminho com base nas condições de Expression e armazena em result
+        decimal result = !string.IsNullOrWhiteSpace(request.Expression)
+            ? calculatorService.EvaluateExpression(request.Expression)
+            : calculatorService.Calculate(request.LeftOperand!.Value, request.Operator!, request.RightOperand!.Value);
 
-    db.CalculationHistory.Add(calculationHistory);
-    await db.SaveChangesAsync();
+        var history = new CalculationHistory
+        {
+            LeftOperand = request.LeftOperand,
+            RightOperand = request.RightOperand,
+            Operator = request.Operator,
+            Expression = request.Expression,
+            Result = result,
+            CreatedAt = DateTime.UtcNow
+        };
 
-    return Results.Ok(new
+        db.CalculationHistory.Add(history);
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new { Result = result, HistoryId = history.Id });
+    }
+    catch (Exception ex)
     {
-        Result = result,
-        HistoryId = calculationHistory.Id
-    });
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: StatusCodes.Status400BadRequest,
+            title: "Erro na requisição"
+        );
+    }
 });
 
 // Histórico de cálculos realizados
@@ -109,6 +121,7 @@ app.MapGet("/historico", async (AppDbContext db, ILogger<Program> logger) =>
             ch.LeftOperand,
             ch.Operator,
             ch.RightOperand,
+            ch.Expression,
             ch.Result,
             ch.CreatedAt
         }) // seleciona todos os campos do histórico de cálculos

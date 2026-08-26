@@ -8,14 +8,17 @@ public class BaseCalculationValidator<T> : AbstractValidator<T> where T : ICalcu
     public BaseCalculationValidator()
     {
         RuleFor(x => x.Operator)
-            .NotEmpty().WithMessage("O operador não pode ser vazio.")
-            .Must(op => new[] { "+", "-", "*", "/" }.Contains(op))
-            .WithMessage("O operador é inválido.");
+            .Must(op => new[] { "+", "-", "*", "/", "%" }.Contains(op))
+            .WithMessage("O operador é inválido.")
+            .When(x => !string.IsNullOrEmpty(x.Operator));
 
+        // Aplica a regra apenas se o operando tiver valor
         RuleFor(x => x.LeftOperand)
-            .InclusiveBetween(-999999999, 999999999);
+            .InclusiveBetween(-999999999m, 999999999m)
+            .When(x => x.LeftOperand.HasValue);
 
         RuleFor(x => x.RightOperand)
-            .InclusiveBetween(-999999999, 999999999);
+            .InclusiveBetween(-999999999m, 999999999m)
+            .When(x => x.RightOperand.HasValue);
     }
 }
