@@ -1,5 +1,8 @@
 # Ignorar pasta do Visual Studio Code
 .vscode/
+# Ignorar pasta Bin e Obj do Visual Studio
+[Bb]in/
+[Oo]bj/
 # Ignorar configurações de rota config.js
 config.js
 # Ignora todos os arquivos do SQlite
