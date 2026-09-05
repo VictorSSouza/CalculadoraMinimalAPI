@@ -32,6 +32,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Criar config.js dinamicamente
+        run: |
+          echo 'window.ENV_CONFIG = { API_BASE_URL: "https://calculadora-api-z2lr.onrender.com/" };' > ./frontend/config.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
